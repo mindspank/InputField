@@ -1,15 +1,15 @@
 {
 	"name": "InputField",
-	"description": "",
+	"description": "Lets you set a variable value.",
 	"type": "visualization",
 	"version": "1.0.0",
 	"icon": "extension",
 	"preview": "preview.png",
-	"author": "",
-	"homepage": "",
+	"author": "Alexander Karlsson",
+	"homepage": "https://github.com/mindspank/InputField",
 	"keywords": "qlik-sense, visualization",
-	"license": "",
-	"repository": "",
+	"license": "ICS",
+	"repository": "https://github.com/mindspank/InputField",
 	"dependencies": {
 		"qlik-sense": ">=1.0.x"
 	}

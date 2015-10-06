@@ -33,21 +33,7 @@ define( ['jquery', 'js/qlik', 'text!./style.css'], function ($, qlik, css) {
 							ref: "inputfield.variablename",
 							label: "Variable name",
 							type: "string"			
-						},
-                        autocreate: {
-                            label: "Autocreate variable",
-                            ref: "inputfield.autocreate",
-                            type: "boolean",
-                            defaultValue: false,
-                            component: "switch",
-                            options: [{
-                                "label": "Off",
-                                value: false
-                            }, {
-								label: "On",
-								value: true
-                            }]
-                        },                        
+						},                  
 						confirmModeGroup: {
 							type: "items",
 							items: {
@@ -86,7 +72,6 @@ define( ['jquery', 'js/qlik', 'text!./style.css'], function ($, qlik, css) {
 		},
 		paint: function ($element, layout) {
 			$element.empty();
-			console.log(layout)
 			var $this = this;
 			var app = qlik.currApp(this);
 			
@@ -102,7 +87,7 @@ define( ['jquery', 'js/qlik', 'text!./style.css'], function ($, qlik, css) {
 				var $input = $('<input style="width: 100%;" class="qui-input" value="' + varlayout.qNum + '">');
 				$input.keypress(function(event) {
 					if (event.keyCode == 13 && layout.inputfield.confirmMode === false) {
-						app.variable.setNumValue(layout.inputfield.variablename, event.target.value)
+						app.variable.setNumValue(layout.inputfield.variablename, +event.target.value)
 					}
 				})
 				.keyup(function(event) {
@@ -118,13 +103,6 @@ define( ['jquery', 'js/qlik', 'text!./style.css'], function ($, qlik, css) {
 					}
 				})
 				$element.append($input)
-			})
-			.catch(function(error) {
-				if (!layout.inputfield.autocreate) {
-					$element.html( "Specified variable does not exist." );
-				} else {
-					app.variable.create({qName: layout.inputfield.variablename, qDefinition: 0}).then($this.paint($element, layout))
-				}
 			})
 	
 		}
