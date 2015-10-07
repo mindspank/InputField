@@ -1,17 +1,14 @@
-define( ['jquery', 'js/qlik', 'text!./style.css'], function ($, qlik, css) {
-
+define([
+	'jquery', 
+	'qlik', 
+	'text!./style.css', 
+	'./debounce', 
+	'./input', 
+	'./properties'
+], function ($, qlik, css, debounce, $input, properties) {
+	'use strict';
+	
 	$("<style>").html(css).appendTo("head");
-
-	function debounce(fn, delay) {
-		var timer = null;
-		return function () {
-			var context = this, args = arguments;
-			clearTimeout(timer);
-			timer = setTimeout(function () {
-			fn.apply(context, args);
-			}, delay);
-		};
-	}
 
 	return {
 		initialProperties: {
@@ -33,76 +30,59 @@ define( ['jquery', 'js/qlik', 'text!./style.css'], function ($, qlik, css) {
 							ref: "inputfield.variablename",
 							label: "Variable name",
 							type: "string"			
-						},                  
-						confirmModeGroup: {
-							type: "items",
-							items: {
-								confirmMode: {
-									label: "Input mode",
-									ref: "inputfield.confirmMode",
-									type: "boolean",
-									component: "buttongroup",
-									defaultValue: false,
-									options: [{
-										label: "Enter key",
-										value: false,
-										tooltip: "Enter key confirms selection"
-									}, {
-										label: "As you type",
-										value: true,
-										tooltip: "Will update as you type"
-									}]
-
-								},
-								timeout: {
-									label: 'Wait between keys (ms)',
-									ref: "inputfield.debounce",
-									type: "number",
-									expression: "optional",
-                                    defaultValue: 250,
-                                    show: function (d) {
-                                        return d.inputfield.confirmMode;
-                                    }
-								}
-							}
-						}
+						},         
+						objecttype: {
+							ref: "inputfield.objecttype",
+							label: "Type of input",
+							component: "dropdown",
+							options: [{
+									value: "input",
+									label: "Input"
+								}, {
+									value: "singleslider",
+									label: "Single value slider"
+								}, {
+									value: "dualslider",
+									label: "Dual value slider"
+								}],
+							type: "string",
+							defaultValue: "input"
+						},
+						inputmode: properties.input
 					}			
 				}
 			}		
 		},
 		paint: function ($element, layout) {
 			$element.empty();
-			var $this = this;
+
 			var app = qlik.currApp(this);
 			
 			app.variable.getByName(layout.inputfield.variablename)
 			.then(function(variable) {
 				return variable.getLayout()
 			})
-			.then(function(varlayout) {
-				if (isNaN(varlayout.qNum)) {
+			.then(function(model) {
+				if (isNaN(model.qNum)) {
 					return $element.html( "Variable does not contain a value" );
 				}
+				switch (layout.inputfield.objecttype) {
+					case 'input':
+						return $input($element, layout, app, model);
+						break;
+						
+					case 'singleslider':
+						return console.log('not implemented');
+						break;
+							
+					case 'dualslider':
+						return console.log('not implemented');
+						break;												
 				
-				var $input = $('<input style="width: 100%;" class="qui-input" value="' + varlayout.qNum + '">');
-				$input.keypress(function(event) {
-					if (event.keyCode == 13 && layout.inputfield.confirmMode === false) {
-						app.variable.setNumValue(layout.inputfield.variablename, +event.target.value)
-					}
-				})
-				.keyup(function(event) {
-					if( /^\d*$/.test(event.target.value) ) {
-						$(this).removeClass('invalid')
-					} else {
-						$(this).addClass('invalid')
-					}
-					if (layout.inputfield.confirmMode && !$(this).hasClass('invalid') ) {
-						return debounce(function() {
-							app.variable.setNumValue(layout.inputfield.variablename, +event.target.value)
-						}, +layout.inputfield.debounce)()
-					}
-				})
-				$element.append($input)
+					default:
+						break;
+				}
+				
 			})
 	
 		}
